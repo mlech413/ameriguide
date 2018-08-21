@@ -1,0 +1,15 @@
+body {
+  text-align: center;
+  color: burlywood;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  background-size: cover;
+}
+
+/* video loop for the background */
+#bgVideo {
+  position: fixed;
+  right: 0;
+  top: 0;
+  min-width: 100%; 
+  min-height: 100%;
+}
