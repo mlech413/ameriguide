@@ -69,6 +69,7 @@ class Basics extends Component {
       if (this.state.basics[s].usa_state === event.target.value) {
 
         let tempArray = [];
+        // tempArray = this.state.basics[s].usa_city.split(","); 
         tempArray = this.state.basics[s].usa_city.toLowerCase().split(","); 
         for(var u = 0; u < tempArray.length; u++) {
           tempArray[u] = tempArray[u].charAt(0).toUpperCase() + tempArray[u].substr(1);
@@ -95,6 +96,7 @@ class Basics extends Component {
       }); 
     console.log("changeCity")
     console.log("event.target.value=" + event.target.value)
+    console.log("this.state.usa_state=" + this.state.usa_state)
     // this.searchPicture(event.target.value + "+" + this.state.usa_state);
     // console.log("this.state.results=");
     // console.log(this.state.results);
@@ -109,26 +111,40 @@ class Basics extends Component {
         if (event.target.value == "New york") {
           queryWiki = "New_York_City";
           console.log("************** 1 *************");
+          this.searchWiki(queryWiki);
+
         }
-        else if (this.state.usa_state == "District of columbia") {
+        else if (this.state.usa_state === "District Of Columbia") {
           queryWiki = "Washington,_D.C.";
           console.log("************** 2 *************");
+         this.searchWiki(queryWiki);
         }
         else {        
-          queryWiki = event.target.value.split(" ").join("_") + '%2C%5F' + this.state.usa_state.split(" ").join("_");
+          queryWiki = event.target.value.split(" ").join("_") + ',_' + this.state.usa_state.split(" ").join("_");
           console.log("************** 3 *************");
-        }
-        this.searchWiki(queryWiki);
-        if (!this.state.wikiResults) {
-          queryWiki = event.target.value.split(" ").join("_");
-          console.log("************** 4 *************");
           this.searchWiki(queryWiki);
+          if (!this.state.wikiResults) {
+            queryWiki = event.target.value.split(" ").join("_");
+            console.log("************** 4 *************");
+            this.searchWiki(queryWiki);
+          }
+          if (!this.state.wikiResults) {
+            queryWiki = this.state.usa_state.split(" ").join("_");
+            console.log("************** 5 *************");
+            this.searchWiki(queryWiki);
+          }
         }
-        if (this.state.wikiResults > " ") {
-          queryWiki = this.state.usa_state.split(" ").join("_");
-          console.log("************** 5 *************");
-          this.searchWiki(queryWiki);
-        }
+        // this.searchWiki(queryWiki);
+        // if (!this.state.wikiResults) {
+        //   queryWiki = event.target.value.split(" ").join("_");
+        //   console.log("************** 4 *************");
+        //   this.searchWiki(queryWiki);
+        // }
+        // if (this.state.wikiResults > " ") {
+        //   queryWiki = this.state.usa_state.split(" ").join("_");
+        //   console.log("************** 5 *************");
+        //   this.searchWiki(queryWiki);
+        // }
         this.searchNews();
         this.searchWeather(event.target.value);
         console.log("this.state.picResults=");
