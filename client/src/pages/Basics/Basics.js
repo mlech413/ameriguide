@@ -10,10 +10,16 @@ import { Input, TextArea, FormBtn } from "../../components/Form";
 import "./Basics.css";
 
 var myResults = [];
-var cityPhoto = "./01.jpg";
+var cityPhotoA = "./01.jpg";
+var cityPhotoB = "./01.jpg";
+var cityPhotoC = "./01.jpg";
 var indexOfPics = 0;
 var randomNum = 0;
 var newsLength = 0;
+var queryWiki = "";
+var listArray = [];
+var weatherHtml = "";
+var wikiCard = "Please Select a State and a City..."
 
 class Basics extends Component {
   state = {
@@ -24,9 +30,11 @@ class Basics extends Component {
     cityList: [],
     search: "",
     results: [],
+    picResults: [],
     newsResults: [],
     newsTitle: [],
-    newsUrl: []
+    newsUrl: [],
+    wikiResults: ""
   };
 
   componentDidMount() {
@@ -76,7 +84,8 @@ class Basics extends Component {
 
   changeCity = event => {
     event.preventDefault();
-          this.setState({ 
+    wikiCard = " ";
+    this.setState({ 
         usa_city: event.target.value,
           search: "",
           results: [],
@@ -96,98 +105,121 @@ class Basics extends Component {
     //   console.log(this.state.results);
     //   if (this.state.results.length < 1) {
         this.searchPicture(this.state.usa_state);
+        
+        if (event.target.value == "New york") {
+          queryWiki = "New_York_City";
+          console.log("************** 1 *************");
+        }
+        else if (this.state.usa_state == "District of columbia") {
+          queryWiki = "Washington,_D.C.";
+          console.log("************** 2 *************");
+        }
+        else {        
+          queryWiki = event.target.value.split(" ").join("_") + '%2C%5F' + this.state.usa_state.split(" ").join("_");
+          console.log("************** 3 *************");
+        }
+        this.searchWiki(queryWiki);
+        if (!this.state.wikiResults) {
+          queryWiki = event.target.value.split(" ").join("_");
+          console.log("************** 4 *************");
+          this.searchWiki(queryWiki);
+        }
+        if (this.state.wikiResults > " ") {
+          queryWiki = this.state.usa_state.split(" ").join("_");
+          console.log("************** 5 *************");
+          this.searchWiki(queryWiki);
+        }
         this.searchNews();
-        // this.searchWeather(event.target.value);
-        console.log("this.state.results=");
-        console.log(this.state.results);
-        if (this.state.results.length > 0) {
-          indexOfPics = this.state.results.length;
-					// use a random picture number based from the total number of possible pictures
-					randomNum = [Math.floor(Math.random() * indexOfPics)];
-					cityPhoto = this.state.results[randomNum].largeImageURL;
-          }
-    //   }
-    // }
-
-    // console.log("this.myResults=");
-    // console.log(myResults);
-    // this.processWeather(this.state.results);
-    // setTimeout(function() {
-    //   console.log("this.state.results=");
-    //   console.log(this.state.results);
-    //   this.processWeather(this.state.results)
-    //   this.setState({ 
-    //     usa_city: event.target.value
-    //   }); 
-    // }, 5000);
+        this.searchWeather(event.target.value);
+        console.log("this.state.picResults=");
+        console.log(this.state.picResults);
   };
-  
+ 
   searchWeather = query => {
     API.searchWeatherAPI(query)
-      .then(res => this.setState({ results: res.data.hits }))
+      .then(resWeather => this.setState({ weatherResults: resWeather.data.list },
+        function() { this.processWeather() }
+      ))
       .catch(err => console.log(err));
   };
-
 
   searchPicture = queryPic => {
     API.searchPictureAPI(queryPic)
-      .then(res => this.setState({ results: res.data.hits }))
+      .then(resPic => this.setState({ picResults: resPic.data.hits },
+        function() {
+          if (this.state.picResults.length > 0) {
+            cityPhotoB = this.state.picResults[0].largeImageURL;
+            cityPhotoC = this.state.picResults[1].largeImageURL;
+            indexOfPics = this.state.picResults.length;
+            // use a random picture number based from the total number of possible pictures
+            randomNum = [Math.floor(Math.random() * indexOfPics)];
+            if (randomNum < 2) {
+              randomNum = 2;
+            }
+            cityPhotoA = this.state.picResults[randomNum].largeImageURL;
+          }
+          else {
+            cityPhotoA = "./01.jpg";
+          };
+         },
+         this.setState({ picResults: resPic.data.hits })
+      ))
       .catch(err => console.log(err));
   };
 
+  searchWiki = queryWiki => {
+    API.searchWikiAPI(queryWiki)
+    .then(resWiki => this.setState({ wikiResults: resWiki.data.query.pages[0].extract }
+      ,
+      function() { console.log("Wiki completed", this.state.wikiResults) },
+      this.setState({ wikiResults: resWiki.data.query.pages[0].extract }),
+      console.log("wikiResults:"),
+      console.log(this.state.wikiResults),
+      wikiCard = this.state.wikiResults
+    ))
+      .catch(err => console.log(err));
+    
+  }
+
   searchNews = queryNews => {
-    var threadTitle = false;
-    var threadURL = "";
     var selectedStateWith20 = this.state.usa_state.split(" ").join("%20");
     var selectedCityWith20 = this.state.usa_city.split(" ").join("%20");
     var queryNews = selectedStateWith20 + "%20" + selectedCityWith20;
     API.searchNewsAPI(queryNews)
-    .then(resNews => this.setState({ newsResults: resNews.data.posts }))
-      .catch(err => console.log(err));
-    const newsTitle = this.state.newsResults.map(p => p.title);
-    const newsUrl = this.state.newsResults.map(p => p.url);
-    if (this.state.newsTitle.length > 10 ) {
-      newsLength = 10;
-    }
-    else {
-      newsLength = this.state.newsTitle.length;
-    }
-    console.log("newsLength=" + 10)
-    console.log("newsUrl:");
-    console.log(newsUrl);
-    console.log("newsTitle:");
-    console.log(newsTitle);
-    this.setState({ newsTitle: newsTitle, newsUrl: newsUrl })
-
+    .then(resNews => this.setState({ newsResults: resNews.data.posts },
+      function() { console.log("News completed", this.state.newsResults) },
+      this.setState({ newsResults: resNews.data.posts }),
+    ))   
   }
  
  
 
-  processWeather(result) {
-    console.log("result=");
-    console.log(result);
-    console.log("result.list=");
-    console.log(result.list);
+  processWeather() {
+    console.log("weatherResults=");
+    console.log(this.state.weatherResults);
+    listArray = this.state.weatherResults;
+    // console.log("result.list=");
+    // console.log(result.list);
     var weatherMonth = [];
 		var weatherDay = [];
 		var weatherHour = [];
 		var weatherMaxTemp = [];
 		var weatherMinTemp = [];
     var weatherDesc = [];
-    var listArray = [result.list]
-			// split up the forecast dates and times into individual variables
-			for (var i=0; i < listArray.length; i++) {
-        console.log("listArray[i].dt_txt=" + listArray[i].dt_txt)
-				weatherMonth[i] = result[i].dt_txt.slice(5, 7);
-				weatherDay[i] = result[i].dt_txt.slice(8, 10);
-				weatherHour[i] = result[i].dt_txt.slice(11, 13);
-				// convert kelvin temp into fahrenheit
-				var kelvinMaxTemp = result[i].main.temp_max;
-				weatherMaxTemp[i] = Math.round(((kelvinMaxTemp-273.15)*1.8)+32);
-				var kelvinMinTemp = result[i].main.temp_min;
-				weatherMinTemp[i] = Math.round(((kelvinMinTemp-273.15)*1.8)+32);
-				weatherDesc[i] = result[i].weather[0].description;
-			}
+		// split up the forecast dates and times into individual variables
+		 	for (var i=0; i < listArray.length; i++) {
+        //  console.log("listArray[i].dt_txt=" + listArray[i].dt_txt)
+		 		weatherMonth[i] = listArray[i].dt_txt.slice(5, 7);
+		 		weatherDay[i] = listArray[i].dt_txt.slice(8, 10);
+		 		weatherHour[i] = listArray[i].dt_txt.slice(11, 13);
+		 		// convert kelvin temp into fahrenheit
+		 		var kelvinMaxTemp = listArray[i].main.temp_max;
+		 		weatherMaxTemp[i] = Math.round(((kelvinMaxTemp-273.15)*1.8)+32);
+		 		var kelvinMinTemp = listArray[i].main.temp_min;
+		 		weatherMinTemp[i] = Math.round(((kelvinMinTemp-273.15)*1.8)+32);
+        weatherDesc[i] = listArray[i].weather[0].description;
+        // console.log("weatherDesc["+i+"]=" + weatherDesc[i]) 
+		 	}
 			var weatherMonthPrev = weatherMonth[0];
 			var weatherDayPrev = weatherDay[0];
 			var highTempForDay = -999;
@@ -195,7 +227,7 @@ class Basics extends Component {
 			var descForDay = "";
 			var weatherHtml = "<table style='width:100%'><tr><th>Date</th><th>High</th><th>Low</th><th>Outlook</th></tr>";
 			// each day returns 8 forecasts (every 3 hours), so cycle through to get overall high and low for each day
-			for (var i=0; i < result.length; i++) {
+			for (var i=0; i < listArray.length; i++) {
 				if (weatherDayPrev == weatherDay[i]) {
 					if (highTempForDay < weatherMaxTemp[i]) {
 						highTempForDay = weatherMaxTemp[i];
@@ -260,7 +292,8 @@ class Basics extends Component {
                 })}
               </StateDropdown>
             ) : (
-                <h3>Loading...</h3>
+                // <h3>Loading...</h3>
+                <img src={"./loading.gif"} alt="Loading..." height="70px"></img>
               )}
           </Col>
           <Col size="md-6">
@@ -290,43 +323,40 @@ class Basics extends Component {
           <Col size="md-6">
           <br/>
             <Jumbotron>
-              <img src={cityPhoto} style={{height: 240, width: 400}}></img>
+              <img src={cityPhotoA} style={{height: 240, width: 400}}></img>
+              <br/><br/>
+              <img src={cityPhotoB} style={{height: 240, width: 400}}></img>
+              <br/><br/>
+              <img src={cityPhotoC} style={{height: 240, width: 400}}></img>
             </Jumbotron>
-            {/* <form>
-              <Input value={this.state.usa_state} 
-                    onChange={this.handleInputChange} 
-                    name="usa-state" 
-                    placeholder="State (required)" />
-              <Input value={this.state.usa_city} 
-                    onChange={this.handleInputChange} 
-                    name="usa-city" 
-                    placeholder="City (required)" />
-              <TextArea value={this.state.usa_city} 
-                    onChange={this.handleInputChange} 
-                    name="usa-other" 
-                    placeholder="Other City (Optional)" />
-              <FormBtn onClick={this.handleSubmit}>Submit Basic</FormBtn>
-            </form> */}
           </Col>
           <Col size="md-6 sm-12">
           <br/>
             <Jumbotron>
+          
+            {wikiCard}
+             
+              
+              {/* <p>{this.state.wikiResults}</p>
               <h1>&nbsp;</h1>
               <h1>Please Select</h1>
-              <h1>a State and City</h1>
-              {/* {this.state.newResults.map(newsFeed => {}
-              console.log(newsFeed)  
-              })}   */}
+              <h1>a State and City</h1> */}
+              
             </Jumbotron>
-            {newsLength ? (
+            {this.state.newsResults.length ? (
               <List>
-                {this.state.newsTitle.map(basicNews => {
-                  console.log(basicNews)
-                  return (
-                    <ListItem key={basicNews}>
-                      <p>{basicNews}</p>
-                    </ListItem>
-                  );
+                <h2>Recent News</h2>
+                {this.state.newsResults.map(basicNews => {
+                  // console.log(basicNews.title)
+                  if(basicNews.title >" "){
+                    return (
+                      
+                      <ListItem key={basicNews.uuid} title={basicNews.title}  url={basicNews.url}/>
+                    
+       
+                    );
+                  }
+                 
                 })}
               </List>
             ) : (
