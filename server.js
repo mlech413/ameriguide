@@ -11,13 +11,13 @@ app.use(bodyParser.json());
 // Serve up static assets (usually on heroku)
 if (process.env.NODE_ENV === "production") {
   app.use(express.static("client/build"));
-  
+
 }
 // Add routes, both API and view
 app.use(routes);
 
 // Connect to the Mongo DB
-var MONGODB_URI =mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/ameriguidelist");
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/ameriguidelist";
 
 // var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
 
@@ -25,6 +25,7 @@ var MONGODB_URI =mongoose.connect(process.env.MONGODB_URI || "mongodb://localhos
 // Connect to the Mongo DB
 mongoose.Promise = Promise;
 mongoose.connect(MONGODB_URI);
+
 app.listen(PORT, function() {
   console.log(`🌎  ==> API Server now listening on PORT ${PORT}!`);
 });
