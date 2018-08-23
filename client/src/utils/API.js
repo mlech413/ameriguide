@@ -5,18 +5,6 @@ export default {
   getBasics: function() {
     return axios.get("/api/basics");
   },
-  // // Gets the basic with the given id
-  // getBasic: function(id) {
-  //   return axios.get("/api/basics/" + id);
-  // },
-  // // Deletes the basic with the given id
-  // deleteBasic: function(id) {
-  //   return axios.delete("/api/basics/" + id);
-  // },
-  // // Saves a basic to the database
-  // saveBasic: function(basicData) {
-  //   return axios.post("/api/basics", basicData);
-  // },
   searchWeatherAPI: function(query) {
     return axios.get("https://api.openweathermap.org/data/2.5/forecast?q=" + query + ",us&mode=json&appid=b76476b1c47594e9baa38a8e8abdf0cb")
     .then(console.log("Weather query=" + query))

@@ -1,25 +1,20 @@
 import React, { Component } from "react";
 import Jumbotron from "../../components/Jumbotron";
-// import DeleteBtn from "../../components/DeleteBtn";
 import API from "../../utils/API";
 import { Col, Row, Container } from "../../components/Grid";
 import { List, ListItem } from "../../components/List";
 import { Weather, WeatherItem } from "../../components/WeatherList";
 import { StateDropdown, StateDropdownItem } from "../../components/StateDropdown";
 import { CityDropdown, CityDropdownItem } from "../../components/CityDropdown";
-// import { Input, TextArea, FormBtn } from "../../components/Form";
 import "./Basics.css";
 
-// var myResults = [];
 var cityPhotoA = "./01.jpg";
 var cityPhotoB = "./02.jpg";
 var cityPhotoC = "./03.jpg";
 var indexOfPics = 0;
 var randomNum = 0;
-// var newsLength = 0;
 var queryWiki = "";
 var listArray = [];
-// var weatherHtml = "";
 var dispWeatherObj = {};
 var dispWeatherArray = [];
 var wikiCard = "Please Select a State and a City...";
@@ -54,9 +49,6 @@ class Basics extends Component {
   };
 
   buildStateArray(passedData) {
-
-    // console.log("passedData:")
-    // console.log(passedData)
     
     // sort mongo db incoming data
     function compare(a, b) {
@@ -72,7 +64,6 @@ class Basics extends Component {
        return comparison;
     }
     
-    // console.log(passedData.sort(compare));
     passedData.sort(compare);
 
     this.setState({ basics: passedData,  
@@ -91,16 +82,13 @@ class Basics extends Component {
   }
 
   change = event => {
-    // event.preventDefault();
     for ( var s = 0; s < this.state.basics.length; s++) {
       if (this.state.basics[s].usa_state === event.target.value) {
         let tempArray = [];
         tempArray = this.state.basics[s].usa_city.split(","); 
-        // tempArray = this.state.basics[s].usa_city.toLowerCase().split(","); 
         
         for(var u = 0; u < tempArray.length; u++) {
             tempArray[u] = toTitleCase(tempArray[u]);
-          // tempArray[u] = tempArray[u].charAt(0).toUpperCase() + tempArray[u].substr(1);
         } 
         function toTitleCase() {
           return tempArray[u].replace(/\b\w*/g, function(txt){
@@ -112,8 +100,6 @@ class Basics extends Component {
           usa_state: event.target.value, 
           cityList: tempArray
         });
-        // console.log(tempArray)
-        // console.log(this.state.cityList)
        }
     }
   }
@@ -131,52 +117,34 @@ class Basics extends Component {
           wikiResults: "",
           weatherArray: []
       }); 
-    console.log("changeCity")
-    console.log("event.target.value=" + event.target.value)
-    console.log("this.state.usa_state=" + this.state.usa_state)
 
     this.searchPicture(this.state.usa_state);
-    // this.setState({ wikiResults: " " })
     if (event.target.value === "New York") {
       queryWiki = "New_York_City";
-      console.log("************** 1 *************");
       this.searchWiki(queryWiki);
     }
     else if (this.state.usa_state === "District Of Columbia") {
       queryWiki = "Washington,_D.C.";
-      console.log("************** 2 *************");
       this.searchWiki(queryWiki);
     }
     else {        
       queryWiki = event.target.value.split(" ").join("_") + ",_" + this.state.usa_state.split(" ").join("_");
-      console.log("************** 3 *************");
       this.searchWiki(queryWiki);
       if (this.state.wikiResults) {
         if (this.state.wikiResults.length > 20) {
-          console.log("Wiki result exists")
         }
         else {
           queryWiki = event.target.value.split(" ").join("_");
-          console.log("************** 4 *************");
           this.searchWiki(queryWiki);
         }
       }
       else {
-        console.log("this.state.wikiResults=" + this.state.wikiResults)
         queryWiki = event.target.value.split(" ").join("_");
-          console.log("************** 5 *************");
           this.searchWiki(queryWiki);
       }
-      // if (!this.state.wikiResults || this.state.wikiResult <= ""){
-      //   queryWiki = this.state.usa_state.split(" ").join("_");
-      //   console.log("************** X *************");
-      //   this.searchWiki(queryWiki);
-      // }
     }
     this.searchNews(event.target.value);
     this.searchWeather(event.target.value);
-    // console.log("this.state.picResults=");
-    // console.log(this.state.picResults);
   };
  
   searchWeather = query => {
@@ -190,8 +158,7 @@ class Basics extends Component {
   setWeather = query => {
     API.searchWeatherAPI(query)
     .then(resWeather => this.setState({ weatherArray: dispWeatherArray },
-      function() { console.log("Weather SET completed", this.state.weatherArray) },
-      // this.setState({ weatherArray: dispWeatherArray })
+      function() { console.log("Weather SET") }
     ))
   };
 
@@ -214,7 +181,6 @@ class Basics extends Component {
             cityPhotoA = "./01.jpg";
           };
          },
-        //  this.setState({ picResults: resPic.data.hits })
       ))
       .catch(err => console.log(err));
   };
@@ -222,10 +188,8 @@ class Basics extends Component {
   searchWiki = queryWiki => {
     API.searchWikiAPI(queryWiki)
     .then(resWiki => this.setState({ wikiResults: resWiki.data.query.pages[0].extract },
-      function() { console.log("Wiki completed", this.state.wikiResults) },
+      function() { console.log("Wiki completed") },
       this.setState({ wikiResults: resWiki.data.query.pages[0].extract }),
-      // console.log("wikiResults:"),
-      // console.log(this.state.wikiResults),
       wikiCard = this.state.wikiResults
     ))
       .catch(err => console.log(err));  
@@ -237,7 +201,7 @@ class Basics extends Component {
     queryNews = selectedCityWith20 + "%20" + selectedStateWith20;
     API.searchNewsAPI(queryNews)
     .then(resNews => this.setState({ newsResults: resNews.data.posts },
-      function() { console.log("News completed", this.state.newsResults) },
+      function() { console.log("News completed") },
       this.setState({ newsResults: resNews.data.posts })
     ))   
   }
@@ -245,11 +209,7 @@ class Basics extends Component {
  
 
   processWeather() {
-    // console.log("weatherResults=");
-    // console.log(this.state.weatherResults);
     listArray = this.state.weatherResults;
-    // console.log("result.list=");
-    // console.log(result.list);
     var weatherMonth = [];
 		var weatherDay = [];
 		var weatherHour = [];
@@ -258,7 +218,6 @@ class Basics extends Component {
     var weatherDesc = [];
 		// split up the forecast dates and times into individual variables
 		 	for (var i=0; i < listArray.length; i++) {
-        //  console.log("listArray[i].dt_txt=" + listArray[i].dt_txt)
 		 		weatherMonth[i] = listArray[i].dt_txt.slice(5, 7);
 		 		weatherDay[i] = listArray[i].dt_txt.slice(8, 10);
 		 		weatherHour[i] = listArray[i].dt_txt.slice(11, 13);
@@ -268,13 +227,9 @@ class Basics extends Component {
 		 		var kelvinMinTemp = listArray[i].main.temp_min;
 		 		weatherMinTemp[i] = Math.round(((kelvinMinTemp-273.15)*1.8)+32);
         weatherDesc[i] = listArray[i].weather[0].description;
-        // console.log("weatherDesc["+i+"]=" + weatherDesc[i]) 
 		 	}
 			var dispWeatherMonthPrev = weatherMonth[0];
 			var dispWeatherDayPrev = weatherDay[0];
-			// var highTempForDay = -999;
-			// var lowTempForDay = 999;
-      // var descForDay = "";
       var dispHighTempForDay = -999;
 			var dispLowTempForDay = 999;
 			var dispDescForDay = "";
@@ -298,10 +253,7 @@ class Basics extends Component {
                 "dispLowTempForDay": dispLowTempForDay,
                 "dispDescForDay": dispDescForDay
               };
-            // console.log("dispWeatherObj:");
-            // console.log(dispWeatherObj);
             dispWeatherArray[w] = dispWeatherObj;
-            // console.log("dispWeatherArray[" + w + "]=" + dispWeatherArray[w]);
             w++;
 						dispWeatherMonthPrev = weatherMonth[t];
 						dispWeatherDayPrev = weatherDay[t];
@@ -310,14 +262,7 @@ class Basics extends Component {
 						dispDescForDay = "";
 				}
       }
-      // console.log(this.state.weatherObj);
-			// console.log("weather array:");  
-      // console.log(dispWeatherArray);
       this.setWeather(this.state.usa_city);
- 
-
-
-      // console.log("this.state.weatherArray=" + this.state.weatherArray);
     };
    
   render() {
@@ -352,7 +297,6 @@ class Basics extends Component {
                 })}
               </StateDropdown>
             ) : (
-                // <h3>Loading...</h3>
                 <img src={"./loading.gif"} alt="Loading..." height="70px"></img>
               )}
           </Col>
@@ -420,28 +364,17 @@ class Basics extends Component {
             <Jumbotron>
           
             {wikiCard}
-             
-              
-              {/* <p>{this.state.wikiResults}</p>
-              <h1>&nbsp;</h1>
-              <h1>Please Select</h1>
-              <h1>a State and City</h1> */}
               
             </Jumbotron>
             {this.state.newsResults.length ? (
               <List>
                 <h2>Recent News</h2>
                 {this.state.newsResults.map(basicNews => {
-                  // console.log(basicNews.title)
                   if(basicNews.title >" "){
                     return (
-                      
                       <ListItem key={basicNews.uuid} title={basicNews.title}  url={basicNews.url}/>
-                    
-       
                     );
                   }
-                 
                 })}
               </List>
             ) : (

@@ -7,8 +7,4 @@ export const WeatherItem = props => (
       <td>  {props.dispLowTempForDay}  </td>
       <td>  {props.dispDescForDay}  </td>
   </tr>
-
-  // <li className="list-group-item">
-  //  <a href={props.url} target='blank'>{props.title}</a>
-  // </li>
 );
