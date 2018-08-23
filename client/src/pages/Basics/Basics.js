@@ -84,7 +84,10 @@ class Basics extends Component {
       results: [],
       newsResults: [],
       newsTitle: [],
-      newsUrl: []})
+      newsUrl: [],
+      wikiResults: "",
+      weatherArray: []}
+    )
   }
 
   change = event => {
@@ -124,7 +127,9 @@ class Basics extends Component {
           results: [],
           newsResults: [],
           newsTitle: [],
-          newsUrl: []
+          newsUrl: [],
+          wikiResults: "",
+          weatherArray: []
       }); 
     console.log("changeCity")
     console.log("event.target.value=" + event.target.value)
@@ -146,18 +151,29 @@ class Basics extends Component {
       queryWiki = event.target.value.split(" ").join("_") + ",_" + this.state.usa_state.split(" ").join("_");
       console.log("************** 3 *************");
       this.searchWiki(queryWiki);
-      if (!this.state.wikiResults || this.state.wikiResult <= "") {
+      if (this.state.wikiResults) {
+        if (this.state.wikiResults.length > 20) {
+          console.log("Wiki result exists")
+        }
+        else {
+          queryWiki = event.target.value.split(" ").join("_");
+          console.log("************** 4 *************");
+          this.searchWiki(queryWiki);
+        }
+      }
+      else {
+        console.log("this.state.wikiResults=" + this.state.wikiResults)
         queryWiki = event.target.value.split(" ").join("_");
-        console.log("************** 4 *************");
-        this.searchWiki(queryWiki);
+          console.log("************** 5 *************");
+          this.searchWiki(queryWiki);
       }
       // if (!this.state.wikiResults || this.state.wikiResult <= ""){
       //   queryWiki = this.state.usa_state.split(" ").join("_");
-      //   console.log("************** 5 *************");
+      //   console.log("************** X *************");
       //   this.searchWiki(queryWiki);
       // }
     }
-    this.searchNews();
+    this.searchNews(event.target.value);
     this.searchWeather(event.target.value);
     // console.log("this.state.picResults=");
     // console.log(this.state.picResults);
@@ -217,12 +233,12 @@ class Basics extends Component {
 
   searchNews = queryNews => {
     var selectedStateWith20 = this.state.usa_state.split(" ").join("%20");
-    var selectedCityWith20 = this.state.usa_city.split(" ").join("%20");
-    queryNews = selectedStateWith20 + "%20" + selectedCityWith20;
+    var selectedCityWith20 = queryNews.split(" ").join("%20");
+    queryNews = selectedCityWith20 + "%20" + selectedStateWith20;
     API.searchNewsAPI(queryNews)
     .then(resNews => this.setState({ newsResults: resNews.data.posts },
       function() { console.log("News completed", this.state.newsResults) },
-      // this.setState({ newsResults: resNews.data.posts }),
+      this.setState({ newsResults: resNews.data.posts })
     ))   
   }
  
