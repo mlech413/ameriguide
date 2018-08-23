@@ -95,7 +95,7 @@ class Basics extends Component {
         tempArray = this.state.basics[s].usa_city.split(","); 
         // tempArray = this.state.basics[s].usa_city.toLowerCase().split(","); 
         
-          for(var u = 0; u < tempArray.length; u++) {
+        for(var u = 0; u < tempArray.length; u++) {
             tempArray[u] = toTitleCase(tempArray[u]);
           // tempArray[u] = tempArray[u].charAt(0).toUpperCase() + tempArray[u].substr(1);
         } 
@@ -151,11 +151,11 @@ class Basics extends Component {
         console.log("************** 4 *************");
         this.searchWiki(queryWiki);
       }
-      if (!this.state.wikiResults || this.state.wikiResult <= ""){
-        queryWiki = this.state.usa_state.split(" ").join("_");
-        console.log("************** 5 *************");
-        this.searchWiki(queryWiki);
-      }
+      // if (!this.state.wikiResults || this.state.wikiResult <= ""){
+      //   queryWiki = this.state.usa_state.split(" ").join("_");
+      //   console.log("************** 5 *************");
+      //   this.searchWiki(queryWiki);
+      // }
     }
     this.searchNews();
     this.searchWeather(event.target.value);
@@ -208,8 +208,8 @@ class Basics extends Component {
     .then(resWiki => this.setState({ wikiResults: resWiki.data.query.pages[0].extract },
       function() { console.log("Wiki completed", this.state.wikiResults) },
       this.setState({ wikiResults: resWiki.data.query.pages[0].extract }),
-      console.log("wikiResults:"),
-      console.log(this.state.wikiResults),
+      // console.log("wikiResults:"),
+      // console.log(this.state.wikiResults),
       wikiCard = this.state.wikiResults
     ))
       .catch(err => console.log(err));  
@@ -229,8 +229,8 @@ class Basics extends Component {
  
 
   processWeather() {
-    console.log("weatherResults=");
-    console.log(this.state.weatherResults);
+    // console.log("weatherResults=");
+    // console.log(this.state.weatherResults);
     listArray = this.state.weatherResults;
     // console.log("result.list=");
     // console.log(result.list);
