@@ -21,7 +21,7 @@
 }
 
 .list-overflow-container li a {
-  color: black;
+  color: #2A878C;
 }
 
 .list-overflow-container li:first-child {
@@ -30,4 +30,14 @@
 
 .list-overflow-container li:last-child {
   border-bottom: none;
+}
+
+.table-group-item {
+  max-height: 545px;
+  border: 1px #DDDDDD solid;
+  border-radius: 4px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  color: black;
+  background: white;
 }

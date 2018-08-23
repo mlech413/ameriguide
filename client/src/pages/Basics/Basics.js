@@ -4,6 +4,7 @@ import DeleteBtn from "../../components/DeleteBtn";
 import API from "../../utils/API";
 import { Col, Row, Container } from "../../components/Grid";
 import { List, ListItem } from "../../components/List";
+import { Weather, WeatherItem } from "../../components/WeatherList";
 import { StateDropdown, StateDropdownItem } from "../../components/StateDropdown";
 import { CityDropdown, CityDropdownItem } from "../../components/CityDropdown";
 import { Input, TextArea, FormBtn } from "../../components/Form";
@@ -11,15 +12,17 @@ import "./Basics.css";
 
 var myResults = [];
 var cityPhotoA = "./01.jpg";
-var cityPhotoB = "./01.jpg";
-var cityPhotoC = "./01.jpg";
+var cityPhotoB = "./02.jpg";
+var cityPhotoC = "./03.jpg";
 var indexOfPics = 0;
 var randomNum = 0;
 var newsLength = 0;
 var queryWiki = "";
 var listArray = [];
 var weatherHtml = "";
-var wikiCard = "Please Select a State and a City..."
+var dispWeatherObj = {};
+var dispWeatherArray = [];
+var wikiCard = "Please Select a State and a City...";
 
 class Basics extends Component {
   state = {
@@ -34,7 +37,8 @@ class Basics extends Component {
     newsResults: [],
     newsTitle: [],
     newsUrl: [],
-    wikiResults: ""
+    wikiResults: "",
+    weatherArray: []
   };
 
   componentDidMount() {
@@ -50,7 +54,26 @@ class Basics extends Component {
   };
 
   buildStateArray(passedData) {
-    const listOfStates = passedData.map(p => p.usa_state);
+
+    console.log("passedData:")
+    console.log(passedData)
+    
+    // sort mongo db incoming data
+    function compare(a, b) {
+      const idA = a._id;
+      const idB = b._id;
+    
+      let comparison = 0;
+      if (idA > idB) {
+        comparison = 1;
+      } else if (idA < idB) {
+        comparison = -1;
+      }
+       return comparison;
+    }
+    
+    console.log(passedData.sort(compare));
+
     this.setState({ basics: passedData,  
       usa_state: "",
       usa_city: "",
@@ -97,58 +120,38 @@ class Basics extends Component {
     console.log("changeCity")
     console.log("event.target.value=" + event.target.value)
     console.log("this.state.usa_state=" + this.state.usa_state)
-    // this.searchPicture(event.target.value + "+" + this.state.usa_state);
-    // console.log("this.state.results=");
-    // console.log(this.state.results);
 
-    // if (this.state.results.length < 1) {
-    //   this.searchPicture(this.state.usa_state + "+scenery");
-    //   console.log("this.state.results=");
-    //   console.log(this.state.results);
-    //   if (this.state.results.length < 1) {
-        this.searchPicture(this.state.usa_state);
-        
-        if (event.target.value == "New york") {
-          queryWiki = "New_York_City";
-          console.log("************** 1 *************");
-          this.searchWiki(queryWiki);
+    this.searchPicture(this.state.usa_state);
 
-        }
-        else if (this.state.usa_state === "District Of Columbia") {
-          queryWiki = "Washington,_D.C.";
-          console.log("************** 2 *************");
-         this.searchWiki(queryWiki);
-        }
-        else {        
-          queryWiki = event.target.value.split(" ").join("_") + ',_' + this.state.usa_state.split(" ").join("_");
-          console.log("************** 3 *************");
-          this.searchWiki(queryWiki);
-          if (!this.state.wikiResults) {
-            queryWiki = event.target.value.split(" ").join("_");
-            console.log("************** 4 *************");
-            this.searchWiki(queryWiki);
-          }
-          if (!this.state.wikiResults) {
-            queryWiki = this.state.usa_state.split(" ").join("_");
-            console.log("************** 5 *************");
-            this.searchWiki(queryWiki);
-          }
-        }
-        // this.searchWiki(queryWiki);
-        // if (!this.state.wikiResults) {
-        //   queryWiki = event.target.value.split(" ").join("_");
-        //   console.log("************** 4 *************");
-        //   this.searchWiki(queryWiki);
-        // }
-        // if (this.state.wikiResults > " ") {
-        //   queryWiki = this.state.usa_state.split(" ").join("_");
-        //   console.log("************** 5 *************");
-        //   this.searchWiki(queryWiki);
-        // }
-        this.searchNews();
-        this.searchWeather(event.target.value);
-        console.log("this.state.picResults=");
-        console.log(this.state.picResults);
+    if (event.target.value == "New york") {
+      queryWiki = "New_York_City";
+      console.log("************** 1 *************");
+      this.searchWiki(queryWiki);
+    }
+    else if (this.state.usa_state === "District Of Columbia") {
+      queryWiki = "Washington,_D.C.";
+      console.log("************** 2 *************");
+      this.searchWiki(queryWiki);
+    }
+    else {        
+      queryWiki = event.target.value.split(" ").join("_") + ',_' + this.state.usa_state.split(" ").join("_");
+      console.log("************** 3 *************");
+      this.searchWiki(queryWiki);
+      if (!this.state.wikiResults) {
+        queryWiki = event.target.value.split(" ").join("_");
+        console.log("************** 4 *************");
+        this.searchWiki(queryWiki);
+      }
+      if (!this.state.wikiResults) {
+        queryWiki = this.state.usa_state.split(" ").join("_");
+        console.log("************** 5 *************");
+        this.searchWiki(queryWiki);
+      }
+    }
+      this.searchNews();
+    this.searchWeather(event.target.value);
+    console.log("this.state.picResults=");
+    console.log(this.state.picResults);
   };
  
   searchWeather = query => {
@@ -157,6 +160,14 @@ class Basics extends Component {
         function() { this.processWeather() }
       ))
       .catch(err => console.log(err));
+  };
+
+  setWeather = query => {
+    API.searchWeatherAPI(query)
+    .then(resWeather => this.setState({ weatherArray: dispWeatherArray },
+      function() { console.log("Weather SET completed", this.state.weatherArray) },
+      this.setState({ weatherArray: dispWeatherArray }),
+    ))
   };
 
   searchPicture = queryPic => {
@@ -193,9 +204,8 @@ class Basics extends Component {
       console.log(this.state.wikiResults),
       wikiCard = this.state.wikiResults
     ))
-      .catch(err => console.log(err));
-    
-  }
+      .catch(err => console.log(err));  
+  };
 
   searchNews = queryNews => {
     var selectedStateWith20 = this.state.usa_state.split(" ").join("%20");
@@ -236,46 +246,56 @@ class Basics extends Component {
         weatherDesc[i] = listArray[i].weather[0].description;
         // console.log("weatherDesc["+i+"]=" + weatherDesc[i]) 
 		 	}
-			var weatherMonthPrev = weatherMonth[0];
-			var weatherDayPrev = weatherDay[0];
+			var dispWeatherMonthPrev = weatherMonth[0];
+			var dispWeatherDayPrev = weatherDay[0];
 			var highTempForDay = -999;
 			var lowTempForDay = 999;
-			var descForDay = "";
-			var weatherHtml = "<table style='width:100%'><tr><th>Date</th><th>High</th><th>Low</th><th>Outlook</th></tr>";
-			// each day returns 8 forecasts (every 3 hours), so cycle through to get overall high and low for each day
+      var descForDay = "";
+      var dispHighTempForDay = -999;
+			var dispLowTempForDay = 999;
+			var dispDescForDay = "";
+      // each day returns 8 forecasts (every 3 hours), so cycle through to get overall high and low for each day
+      var w = 0;
 			for (var i=0; i < listArray.length; i++) {
-				if (weatherDayPrev == weatherDay[i]) {
-					if (highTempForDay < weatherMaxTemp[i]) {
-						highTempForDay = weatherMaxTemp[i];
-						descForDay = weatherDesc[i];
+				if (dispWeatherDayPrev == weatherDay[i]) {
+					if (dispHighTempForDay < weatherMaxTemp[i]) {
+						dispHighTempForDay = weatherMaxTemp[i];
+						dispDescForDay = weatherDesc[i];
 					}
-					if (lowTempForDay > weatherMinTemp[i]) {
-						lowTempForDay = weatherMinTemp[i];
+					if (dispLowTempForDay > weatherMinTemp[i]) {
+						dispLowTempForDay = weatherMinTemp[i];
 					}
 				}
 				else {
-					weatherHtml = weatherHtml +
-						"<tr>" +
-							"<td>" + weatherMonthPrev + "/" + weatherDayPrev + "</td>" +
-							"<td>" + highTempForDay + "</td>" +
-							"<td>" + lowTempForDay + "</td>" +
-							"<td>" + descForDay + "</td>" +
-						"</tr>";
-						weatherMonthPrev = weatherMonth[i];
-						weatherDayPrev = weatherDay[i];
-						highTempForDay = -999;
-						lowTempForDay = 999;
-						descForDay = "";
+            dispWeatherObj = {
+                "dispWeatherMonthPrev": dispWeatherMonthPrev,
+                "dispWeatherDayPrev": dispWeatherDayPrev,
+                "dispHighTempForDay": dispHighTempForDay,
+                "dispLowTempForDay": dispLowTempForDay,
+                "dispDescForDay": dispDescForDay
+              };
+            console.log("dispWeatherObj:");
+            console.log(dispWeatherObj);
+            dispWeatherArray[w] = dispWeatherObj;
+            console.log("dispWeatherArray[" + w + "]=" + dispWeatherArray[w]);
+            w++;
+						dispWeatherMonthPrev = weatherMonth[i];
+						dispWeatherDayPrev = weatherDay[i];
+						dispHighTempForDay = -999;
+						dispLowTempForDay = 999;
+						dispDescForDay = "";
 				}
-			}
-			weatherHtml = weatherHtml + "</table>";
-			console.log("weather card");
-			// write out weather to screen
-			console.log(weatherHtml);
-		};
+      }
+      console.log(this.state.weatherObj);
+			console.log("weather array:");  
+      console.log(dispWeatherArray);
+      this.setWeather(this.state.usa_city);
+ 
 
 
-  
+      console.log("this.state.weatherArray=" + this.state.weatherArray);
+    };
+   
   render() {
     return (
       <Container fluid>
@@ -335,16 +355,46 @@ class Basics extends Component {
           </Col>
          
         </Row>
+        
         <Row>
           <Col size="md-6">
           <br/>
             <Jumbotron>
+            {console.log("this.state.weatherArray.length=" + this.state.weatherArray.length)}
               <img src={cityPhotoA} style={{height: 240, width: 400}}></img>
               <br/><br/>
               <img src={cityPhotoB} style={{height: 240, width: 400}}></img>
               <br/><br/>
               <img src={cityPhotoC} style={{height: 240, width: 400}}></img>
             </Jumbotron>
+            {this.state.weatherArray.length ? (
+              <Weather>
+                
+                {this.state.weatherArray.map(basicWeather => {
+                  console.log("KEY=" + basicWeather.dispWeatherDayPrev)
+                  if(basicWeather.dispWeatherMonthPrev >" "){
+                    return (
+                      
+                      <WeatherItem key={basicWeather.dispWeatherDayPrev} 
+                          dispWeatherMonthPrev={basicWeather.dispWeatherMonthPrev} 
+                          dispWeatherDayPrev={basicWeather.dispWeatherDayPrev}
+                          dispHighTempForDay={basicWeather.dispHighTempForDay}
+                          dispLowTempForDay={basicWeather.dispLowTempForDay}
+                          dispDescForDay={basicWeather.dispDescForDay}
+                          />
+                    
+       
+                    );
+                  }
+                 
+                })}
+              </Weather>
+            ) : (
+            <h3></h3>
+            )}
+
+
+
           </Col>
           <Col size="md-6 sm-12">
           <br/>
