@@ -91,20 +91,28 @@ class Basics extends Component {
     // event.preventDefault();
     for ( var s = 0; s < this.state.basics.length; s++) {
       if (this.state.basics[s].usa_state === event.target.value) {
-
         let tempArray = [];
-        // tempArray = this.state.basics[s].usa_city.split(","); 
-        tempArray = this.state.basics[s].usa_city.toLowerCase().split(","); 
-        for(var u = 0; u < tempArray.length; u++) {
-          tempArray[u] = tempArray[u].charAt(0).toUpperCase() + tempArray[u].substr(1);
+        tempArray = this.state.basics[s].usa_city.split(","); 
+        // tempArray = this.state.basics[s].usa_city.toLowerCase().split(","); 
+        
+          for(var u = 0; u < tempArray.length; u++) {
+            tempArray[u] = toTitleCase(tempArray[u]);
+          // tempArray[u] = tempArray[u].charAt(0).toUpperCase() + tempArray[u].substr(1);
         } 
+        function toTitleCase() {
+          return tempArray[u].replace(/\b\w*/g, function(txt){
+            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+          });
+        }
+        
         this.setState({ 
           usa_state: event.target.value, 
           cityList: tempArray
         });
+        // console.log(tempArray)
+        // console.log(this.state.cityList)
        }
     }
-
   }
 
   changeCity = event => {
@@ -124,7 +132,7 @@ class Basics extends Component {
 
     this.searchPicture(this.state.usa_state);
     // this.setState({ wikiResults: " " })
-    if (event.target.value === "New york") {
+    if (event.target.value === "New York") {
       queryWiki = "New_York_City";
       console.log("************** 1 *************");
       this.searchWiki(queryWiki);
@@ -138,12 +146,12 @@ class Basics extends Component {
       queryWiki = event.target.value.split(" ").join("_") + ",_" + this.state.usa_state.split(" ").join("_");
       console.log("************** 3 *************");
       this.searchWiki(queryWiki);
-      if (!this.state.wikiResults) {
+      if (!this.state.wikiResults || this.state.wikiResult <= "") {
         queryWiki = event.target.value.split(" ").join("_");
         console.log("************** 4 *************");
         this.searchWiki(queryWiki);
       }
-      if (!this.state.wikiResults) {
+      if (!this.state.wikiResults || this.state.wikiResult <= ""){
         queryWiki = this.state.usa_state.split(" ").join("_");
         console.log("************** 5 *************");
         this.searchWiki(queryWiki);
