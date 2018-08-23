@@ -1,8 +1,8 @@
-# `AmeriGuide
+# `AmeriGuide`
 
 ## Locate your next great travel destination!
 
-## `WHat is it?`
+## `What is it?`
 
 Just pick a state and city from across the U.S.A. and enjoy! Valuable information includes the following:
 
