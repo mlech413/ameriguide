@@ -1,5 +1,3 @@
-# `AmeriGuide`
-
 ## Locate your next great travel destination!
 
 ## `What is it?`
